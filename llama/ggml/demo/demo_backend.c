@@ -88,10 +88,11 @@ int main(void) {
         // result tensor
         struct ggml_tensor *result0 = ggml_mul_mat(ctx_cgrapa, tensor_a, tensor_b);
         ggml_build_forward_expand(gf, result0);
+        ggml_graph_print(gf);
     }
     // 7.将tensor添加到计算图 (no_alloc=true, 需要自己分配内存)
     ggml_gallocr_t gallocr = ggml_gallocr_new(ggml_backend_get_default_buffer_type(backend));
-    ggml_gallocr_add(gallocr, gf);
+    ggml_gallocr_alloc_graph(gallocr, gf);
 
     // 8.使用后端调度计算图(跳过)
 
@@ -108,7 +109,7 @@ int main(void) {
     float *result_data = malloc(ggml_nbytes(result));
     // result_tensor 存储在后端buffer中，需要拷贝到RAM中
     ggml_backend_tensor_get(result, result_data, 0, ggml_nbytes(result));
-    prinft("mul mat (%d x %d) (transposed result):\n", (int)result->ne[0], (int)result->ne[1]);
+    printf("mul mat (%d x %d) (transposed result):\n", (int)result->ne[0], (int)result->ne[1]);
     for (int j = 0; j < result->ne[1]; j++) {
         if (j > 0) {
             printf("\n");
@@ -123,7 +124,7 @@ int main(void) {
     // 11.释放内存
     ggml_free(ctx);
     ggml_free(ctx_cgrapa);
-    ggml_backend_free_buffer(buffer);
+    ggml_backend_buffer_free(buffer);
     ggml_backend_free(backend);
     ggml_gallocr_free(gallocr);
     return 0;   
